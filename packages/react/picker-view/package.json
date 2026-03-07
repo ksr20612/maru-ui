@@ -1,0 +1,46 @@
+{
+  "name": "@maru-ui/picker-view",
+  "version": "0.0.1",
+  "description": "Picker view UI component and headless hook",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./hook": {
+      "types": "./dist/hook.d.ts",
+      "import": "./dist/hook.mjs",
+      "require": "./dist/hook.js"
+    },
+    "./styles": "./dist/picker-view.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@maru-ui/config-typescript": "workspace:*",
+    "@storybook/react": "^8.4.7",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.0.0"
+  }
+}

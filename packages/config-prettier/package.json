@@ -1,0 +1,22 @@
+{
+  "name": "@maru-ui/config-prettier",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Prettier configuration for Maru UI monorepo",
+  "main": "index.mjs",
+  "type": "module",
+  "files": [
+    "index.mjs"
+  ],
+  "keywords": [
+    "prettier",
+    "config",
+    "maru-ui"
+  ],
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  },
+  "peerDependencies": {
+    "prettier": "^3.5.3"
+  }
+}

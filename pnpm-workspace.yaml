@@ -1,0 +1,6 @@
+packages:
+  - 'packages/core'
+  - 'packages/config-*'
+  - 'packages/react'
+  - 'packages/react/*'
+  - 'docs'

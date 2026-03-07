@@ -1,0 +1,35 @@
+---
+title: 시작하기
+description: Maru UI 설치 및 사용 방법
+---
+
+# 시작하기
+
+## 설치
+
+```bash
+pnpm add @maru-ui/picker-view
+# 또는 Hook만 사용 시
+pnpm add @maru-ui/picker-view
+# import from '@maru-ui/picker-view/hook'
+```
+
+## 기본 사용
+
+```tsx
+import { PickerView } from '@maru-ui/picker-view';
+import '@maru-ui/picker-view/styles';
+
+<PickerView items={['일', '이', '삼']} />;
+```
+
+## Headless (Hook만)
+
+```tsx
+import { usePickerView } from '@maru-ui/picker-view/hook';
+
+const { selectedIndex, setSelectedIndex } = usePickerView({
+  itemCount: 10,
+  visibleCount: 5,
+});
+```

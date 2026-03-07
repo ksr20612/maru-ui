@@ -1,0 +1,46 @@
+{
+  "name": "@maru-ui/monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Maru UI design system monorepo",
+  "license": "MIT",
+  "keywords": [
+    "maru-ui",
+    "design-system",
+    "react",
+    "components"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "docs:dev": "pnpm --filter @maru-ui/docs dev",
+    "docs:build": "pnpm --filter @maru-ui/docs build",
+    "storybook": "pnpm --filter @maru-ui/react storybook",
+    "build-storybook": "pnpm --filter @maru-ui/react build-storybook",
+    "lint": "turbo run lint",
+    "lint:root": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "publish": "turbo run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@maru-ui/config-eslint": "workspace:*",
+    "@maru-ui/config-prettier": "workspace:*",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  },
+  "prettier": "@maru-ui/config-prettier",
+  "packageManager": "pnpm@9.14.2",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
