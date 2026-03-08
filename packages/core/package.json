@@ -1,0 +1,30 @@
+{
+  "name": "@maru-ui/core",
+  "version": "0.0.1",
+  "description": "Framework-agnostic core utilities and engine for Maru UI",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@maru-ui/config-typescript": "workspace:*",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@maru-ui/react",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Maru UI React components & hooks",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "devDependencies": {
+    "@maru-ui/config-typescript": "workspace:*",
+    "@types/node": "^22.10.0",
+    "@storybook/addon-essentials": "^8.4.7",
+    "@storybook/react": "^8.4.7",
+    "@storybook/react-vite": "^8.4.7",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "storybook": "^8.4.7",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.0"
+  }
+}

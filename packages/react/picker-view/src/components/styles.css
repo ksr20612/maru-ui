@@ -1,0 +1,85 @@
+/* Wrapper: 그라데이션 오버레이 + 포커스 링 */
+.maru-picker-view__wrapper {
+  position: relative;
+  width: auto;
+  height: fit-content;
+  overflow: hidden;
+}
+
+.maru-picker-view__wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.6) 15%,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0) 70%,
+    rgba(255, 255, 255, 0.6) 85%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  pointer-events: none;
+}
+
+.maru-picker-view__wrapper:focus-within {
+  outline: 2px solid white;
+  box-shadow: 0 0 0 4px black;
+}
+
+/* 휠 컨테이너 */
+.maru-picker-view {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  height: calc(3 * var(--maru-picker-view-option-height, 50px));
+  position: relative;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.3s ease-out;
+}
+
+.maru-picker-view:active {
+  cursor: grabbing;
+}
+
+/* 스크롤 컨테이너 */
+.maru-picker-view {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.maru-picker-view::-webkit-scrollbar {
+  display: none;
+}
+
+/* 아이템: 고정 높이, 스냅 */
+.maru-picker-view__option {
+  height: var(--maru-picker-view-option-height, 50px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: start;
+  position: relative;
+  box-sizing: border-box;
+  padding: 0 1rem;
+  color: var(--maru-picker-view-option-color, #666);
+  font-size: var(--maru-picker-view-option-font-size, 1rem);
+  line-height: var(--maru-picker-view-option-line-height, 1.5);
+}
+
+.maru-picker-view__option--selected {
+  color: var(--maru-picker-view-option-selected-color, black);
+  font-weight: var(--maru-picker-view-option-selected-font-weight, 600);
+  font-size: var(--maru-picker-view-option-selected-font-size, 1.125rem);
+}
+
+.maru-picker-view__option--spacer {
+  pointer-events: none;
+  color: transparent;
+  visibility: hidden;
+}

@@ -1,0 +1,34 @@
+{
+  "name": "@maru-ui/config-eslint",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ESLint configuration for Maru UI monorepo",
+  "main": "index.mjs",
+  "type": "module",
+  "files": [
+    "index.mjs",
+    "javascript/javascript.mjs",
+    "typescript/typescript.mjs",
+    "react/react.mjs"
+  ],
+  "keywords": [
+    "eslint",
+    "config",
+    "maru-ui"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.25.1",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^4.3.4",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.0.0",
+    "typescript-eslint": "^8.31.1"
+  },
+  "peerDependencies": {
+    "eslint": "^9.25.1"
+  }
+}

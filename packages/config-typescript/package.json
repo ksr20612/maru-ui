@@ -1,0 +1,15 @@
+{
+  "name": "@maru-ui/config-typescript",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TypeScript configuration for Maru UI monorepo",
+  "main": "tsconfig.json",
+  "files": [
+    "tsconfig.json",
+    "tsconfig.base.json",
+    "tsconfig.react.json"
+  ],
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
