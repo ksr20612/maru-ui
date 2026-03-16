@@ -1,4 +1,4 @@
-import type { VelocitySample } from '../velocity.types';
+import type { VelocitySample } from '../momentum.types';
 
 export interface CalculateVelocityOptions {
   maxVelocity?: number;
@@ -24,3 +24,4 @@ export default function calculateVelocity(
     Math.min(options.maxVelocity ?? Number.POSITIVE_INFINITY, velocity),
   );
 }
+

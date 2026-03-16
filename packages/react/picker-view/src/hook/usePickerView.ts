@@ -1,6 +1,6 @@
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, MouseEvent, TouchEvent } from 'react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { calculateVelocity, type VelocitySample } from '@maru-ui/core';
+import { getClampedPosition, getNextIndexByKey, getSnapIndex, MomentumEngine } from '@maru-ui/core';
 import type { UsePickerViewOptions, UsePickerViewReturn } from './types';
 import { MOMENTUM_CONFIG } from './types';
 
@@ -18,18 +18,31 @@ export default function usePickerView({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const rafId = useRef<number | null>(null);
   const isReady = useRef(false);
+  const momentumEngineRef = useRef(
+    new MomentumEngine({
+      min: 0,
+      max: itemHeight * (pickerViewOptions.length - 1),
+      friction: MOMENTUM_CONFIG.FRICTION,
+      itemHeight,
+      length: pickerViewOptions.length,
+      nearZeroVelocity: MOMENTUM_CONFIG.NEAR_ZERO_VELOCITY,
+      snapVelocityThreshold: MOMENTUM_CONFIG.SNAP_VELOCITY_THRESHOLD,
+      boundaryPx: MOMENTUM_CONFIG.BOUNDARY_PX,
+      maxVelocity: MOMENTUM_CONFIG.MAX_VELOCITY,
+    }),
+  );
 
   const [scrollPosition, setScrollPosition] = useState(initialIndex * itemHeight);
   const [startDragScrollPosition, setStartDragScrollPosition] = useState(0);
   const [startDragY, setStartDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [velocitySamples, setVelocitySamples] = useState<VelocitySample[]>([]);
 
-  const selectedIndex = Math.max(
-    0,
-    Math.min(Math.round(scrollPosition / itemHeight), pickerViewOptions.length - 1),
-  );
+  const selectedIndex = getSnapIndex({
+    position: scrollPosition,
+    itemHeight,
+    length: pickerViewOptions.length,
+  });
   const selectedValue = pickerViewOptions[selectedIndex]?.value ?? 0;
 
   const scrollContainer = () => wrapperRef.current?.children[0] as HTMLElement | undefined;
@@ -39,10 +52,11 @@ export default function usePickerView({
     (finalPosition: number) => {
       if (rafId.current) cancelAnimationFrame(rafId.current);
 
-      const index = Math.max(
-        0,
-        Math.min(Math.round(finalPosition / itemHeight), pickerViewOptions.length - 1),
-      );
+      const index = getSnapIndex({
+        position: finalPosition,
+        itemHeight,
+        length: pickerViewOptions.length,
+      });
       const targetPosition = index * itemHeight;
       currentIndex.current = index;
 
@@ -78,40 +92,25 @@ export default function usePickerView({
       if (rafId.current) cancelAnimationFrame(rafId.current);
 
       setIsAnimating(true);
-      let velocity = initialVelocity * -1;
-      let currentPosition = scrollPosition;
+      momentumEngineRef.current.start({
+        position: scrollPosition,
+        velocity: initialVelocity * -1,
+      });
       let lastTime = performance.now();
 
       const animate = (currentTime: number) => {
         const time = currentTime - lastTime;
         lastTime = currentTime;
-        currentPosition += velocity * time;
+        const stepResult = momentumEngineRef.current.step(time);
 
-        if (currentPosition < 0) {
-          currentPosition = 0;
-          velocity = 0;
-        } else if (currentPosition > maxScrollPosition) {
-          currentPosition = maxScrollPosition;
-          velocity = 0;
-        }
-
-        setScrollPosition(currentPosition);
-        velocity *= MOMENTUM_CONFIG.FRICTION;
+        setScrollPosition(stepResult.position);
 
         const container = scrollContainer();
-        if (container) container.scrollTop = currentPosition;
+        if (container) container.scrollTop = stepResult.position;
 
-        const nearestIndex = Math.round(currentPosition / itemHeight);
-        const targetScrollPosition = nearestIndex * itemHeight;
-        const distance = Math.abs(currentPosition - targetScrollPosition);
-        const isNearZeroVelocity = Math.abs(velocity) <= MOMENTUM_CONFIG.NEAR_ZERO_VELOCITY;
-        const isSlowEnough = Math.abs(velocity) <= MOMENTUM_CONFIG.SNAP_VELOCITY_THRESHOLD;
-        const isNearBoundary = distance <= MOMENTUM_CONFIG.BOUNDARY_PX;
-
-        // 속도가 0에 충분히 가깝고 옵션의 끝단에 충분히 가깝거나, 속도가 충분히 느리면 스냅
-        if ((isNearZeroVelocity && isNearBoundary) || isSlowEnough) {
+        if (stepResult.shouldSnap) {
           setIsAnimating(false);
-          snapToClosestItem(currentPosition);
+          snapToClosestItem(stepResult.position);
         } else {
           rafId.current = requestAnimationFrame(animate);
         }
@@ -119,7 +118,7 @@ export default function usePickerView({
 
       rafId.current = requestAnimationFrame(animate);
     },
-    [scrollPosition, maxScrollPosition, itemHeight, snapToClosestItem],
+    [scrollPosition, snapToClosestItem],
   );
 
   const handleStart = useCallback(
@@ -128,7 +127,9 @@ export default function usePickerView({
       setIsAnimating(false);
       setStartDragY(clientY);
       setStartDragScrollPosition(scrollPosition);
-      setVelocitySamples([{ time: performance.now(), value: clientY }]);
+      momentumEngineRef.current.stop();
+      momentumEngineRef.current.clearSamples();
+      momentumEngineRef.current.pushSample({ time: performance.now(), value: clientY });
     },
     [scrollPosition],
   );
@@ -137,20 +138,18 @@ export default function usePickerView({
     (clientY: number) => {
       if (!isDragging || isAnimating) return;
 
-      const newScrollPosition = Math.max(
-        0,
-        Math.min(maxScrollPosition, startDragScrollPosition + (startDragY - clientY)),
-      );
+      const newScrollPosition = getClampedPosition({
+        position: startDragScrollPosition + (startDragY - clientY),
+        min: 0,
+        max: maxScrollPosition,
+      });
       setScrollPosition(newScrollPosition);
 
       const container = scrollContainer();
       if (container) container.scrollTop = newScrollPosition;
 
       const now = performance.now();
-      setVelocitySamples((prev) => [
-        ...prev.filter((sample) => now - sample.time <= 100),
-        { time: now, value: clientY },
-      ]);
+      momentumEngineRef.current.pushSample({ time: now, value: clientY });
     },
     [isDragging, isAnimating, startDragY, startDragScrollPosition, maxScrollPosition],
   );
@@ -160,9 +159,7 @@ export default function usePickerView({
       if (!isDragging) return;
       setIsDragging(false);
 
-      const velocity = calculateVelocity(velocitySamples, {
-        maxVelocity: MOMENTUM_CONFIG.MAX_VELOCITY,
-      });
+      const velocity = momentumEngineRef.current.getVelocityFromSamples();
 
       // 속도가 느리면(클릭 등) 즉시 선택 처리
       if (Math.abs(velocity) < MOMENTUM_CONFIG.MIN_VELOCITY) {
@@ -192,7 +189,7 @@ export default function usePickerView({
 
       applyMomentumScroll(velocity);
     },
-    [isDragging, velocitySamples, pickerViewOptions, itemHeight, onChange, applyMomentumScroll],
+    [isDragging, pickerViewOptions, itemHeight, onChange, applyMomentumScroll],
   );
 
   const handleMouseDown = useCallback(
@@ -219,26 +216,15 @@ export default function usePickerView({
     (event: KeyboardEvent<HTMLDivElement>) => {
       event.stopPropagation();
 
-      let newIndex = currentIndex.current;
-      if (event.key === 'ArrowUp') {
-        event.preventDefault();
-        newIndex = newIndex >= pickerViewOptions.length - 1 ? 0 : newIndex + 1;
-      } else if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        newIndex = newIndex <= 0 ? pickerViewOptions.length - 1 : newIndex - 1;
-      } else if (event.key === 'PageUp') {
-        event.preventDefault();
-        newIndex = Math.min(pickerViewOptions.length - 1, newIndex + 5);
-      } else if (event.key === 'PageDown') {
-        event.preventDefault();
-        newIndex = Math.max(0, newIndex - 5);
-      } else if (event.key === 'Home') {
-        event.preventDefault();
-        newIndex = 0;
-      } else if (event.key === 'End') {
-        event.preventDefault();
-        newIndex = pickerViewOptions.length - 1;
-      } else return;
+      const newIndex = getNextIndexByKey({
+        key: event.key,
+        currentIndex: currentIndex.current,
+        length: pickerViewOptions.length,
+      });
+
+      if (newIndex === currentIndex.current) return;
+
+      event.preventDefault();
 
       if (pickerViewOptions[newIndex]) {
         onChange(pickerViewOptions[newIndex].value, pickerViewOptions[newIndex]);
@@ -333,6 +319,20 @@ export default function usePickerView({
       behavior: isReady.current ? 'smooth' : 'instant',
     });
   }, [value, pickerViewOptions, itemHeight]);
+
+  useEffect(() => {
+    momentumEngineRef.current.configure({
+      min: 0,
+      max: maxScrollPosition,
+      friction: MOMENTUM_CONFIG.FRICTION,
+      itemHeight,
+      length: pickerViewOptions.length,
+      nearZeroVelocity: MOMENTUM_CONFIG.NEAR_ZERO_VELOCITY,
+      snapVelocityThreshold: MOMENTUM_CONFIG.SNAP_VELOCITY_THRESHOLD,
+      boundaryPx: MOMENTUM_CONFIG.BOUNDARY_PX,
+      maxVelocity: MOMENTUM_CONFIG.MAX_VELOCITY,
+    });
+  }, [itemHeight, maxScrollPosition, pickerViewOptions.length]);
 
   useEffect(() => {
     isReady.current = true;

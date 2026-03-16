@@ -1,5 +1,5 @@
+import type { VelocitySample } from '../momentum.types';
 import calculateVelocity from './calculateVelocity';
-import type { VelocitySample } from '../velocity.types';
 
 describe('calculateVelocity', () => {
   it('returns 0 when less than 2 samples are provided', () => {
