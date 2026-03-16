@@ -215,20 +215,25 @@ export default function usePickerView({
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       event.stopPropagation();
-      event.preventDefault();
 
       let newIndex = currentIndex.current;
       if (event.key === 'ArrowUp') {
+        event.preventDefault();
         newIndex = newIndex >= pickerViewOptions.length - 1 ? 0 : newIndex + 1;
       } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
         newIndex = newIndex <= 0 ? pickerViewOptions.length - 1 : newIndex - 1;
       } else if (event.key === 'PageUp') {
+        event.preventDefault();
         newIndex = Math.min(pickerViewOptions.length - 1, newIndex + 5);
       } else if (event.key === 'PageDown') {
+        event.preventDefault();
         newIndex = Math.max(0, newIndex - 5);
       } else if (event.key === 'Home') {
+        event.preventDefault();
         newIndex = 0;
       } else if (event.key === 'End') {
+        event.preventDefault();
         newIndex = pickerViewOptions.length - 1;
       } else return;
 
