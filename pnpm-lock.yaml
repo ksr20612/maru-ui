@@ -254,6 +254,30 @@ importers:
         specifier: ^4.0.0
         version: 4.5.4(@types/node@22.19.15)(rollup@4.59.0)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.32.0))
 
+  packages/react/react-hooks:
+    devDependencies:
+      '@maru-ui/config-typescript':
+        specifier: workspace:*
+        version: link:../../config-typescript
+      '@types/react':
+        specifier: ^19.0.1
+        version: 19.2.14
+      glob:
+        specifier: ^13.0.6
+        version: 13.0.6
+      react:
+        specifier: ^19.0.0
+        version: 19.2.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.32.0)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@22.19.15)(rollup@4.59.0)(typescript@5.9.3)(vite@6.4.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.32.0))
+
 packages:
 
   '@adobe/css-tools@4.4.4':
