@@ -37,6 +37,7 @@
     "@storybook/react": "^8.4.7",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
+    "@maru-ui/core": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "typescript": "^5.8.3",

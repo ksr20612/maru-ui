@@ -1,6 +1,7 @@
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, MouseEvent, TouchEvent } from 'react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { UsePickerViewOptions, UsePickerViewReturn, VelocitySample } from './types';
+import { calculateVelocity, type VelocitySample } from '@maru-ui/core';
+import type { UsePickerViewOptions, UsePickerViewReturn } from './types';
 import { MOMENTUM_CONFIG } from './types';
 
 export default function usePickerView({
@@ -127,7 +128,7 @@ export default function usePickerView({
       setIsAnimating(false);
       setStartDragY(clientY);
       setStartDragScrollPosition(scrollPosition);
-      setVelocitySamples([{ time: performance.now(), y: clientY }]);
+      setVelocitySamples([{ time: performance.now(), value: clientY }]);
     },
     [scrollPosition],
   );
@@ -148,7 +149,7 @@ export default function usePickerView({
       const now = performance.now();
       setVelocitySamples((prev) => [
         ...prev.filter((sample) => now - sample.time <= 100),
-        { time: now, y: clientY },
+        { time: now, value: clientY },
       ]);
     },
     [isDragging, isAnimating, startDragY, startDragScrollPosition, maxScrollPosition],
@@ -159,7 +160,9 @@ export default function usePickerView({
       if (!isDragging) return;
       setIsDragging(false);
 
-      const velocity = calculateVelocity(velocitySamples);
+      const velocity = calculateVelocity(velocitySamples, {
+        maxVelocity: MOMENTUM_CONFIG.MAX_VELOCITY,
+      });
 
       // 속도가 느리면(클릭 등) 즉시 선택 처리
       if (Math.abs(velocity) < MOMENTUM_CONFIG.MIN_VELOCITY) {
@@ -376,21 +379,4 @@ export default function usePickerView({
     handleMouseMove,
     handleTouchStart,
   };
-}
-
-function calculateVelocity(samples: VelocitySample[]) {
-  if (samples.length < 2) return 0;
-
-  // 100ms 범위 내 수집된 샘플 값으로 속도 계산
-  const first = samples[0];
-  const last = samples[samples.length - 1];
-  const time = last.time - first.time;
-  const distance = last.y - first.y;
-
-  if (time <= 0) return 0;
-
-  return Math.max(
-    -MOMENTUM_CONFIG.MAX_VELOCITY,
-    Math.min(MOMENTUM_CONFIG.MAX_VELOCITY, distance / time),
-  );
 }
