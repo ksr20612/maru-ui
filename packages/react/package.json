@@ -9,15 +9,16 @@
   },
   "devDependencies": {
     "@maru-ui/config-typescript": "workspace:*",
+    "@maru-ui/react-hooks": "workspace:*",
     "@types/node": "^22.10.0",
-    "@storybook/addon-essentials": "^8.4.7",
-    "@storybook/react": "^8.4.7",
-    "@storybook/react-vite": "^8.4.7",
+    "@storybook/addon-essentials": "^8.6.18",
+    "@storybook/react": "^8.6.18",
+    "@storybook/react-vite": "^8.6.18",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "storybook": "^8.4.7",
+    "storybook": "^8.6.18",
     "typescript": "^5.8.3",
     "vite": "^6.0.0"
   }

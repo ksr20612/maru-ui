@@ -1,7 +1,12 @@
-/**
- * @maru-ui/core
- * Framework-agnostic utilities and engine.
- * Picker, pull-to-refresh 등의 공통 로직을 추후 이곳으로 분리할 수 있습니다.
- */
-
-export const CORE_VERSION = '0.0.1';
+export * from './momentum/momentum.types';
+export { default as calculateVelocity } from './momentum/calculateVelocity/calculateVelocity';
+export { default as getSnapIndex } from './momentum/getSnapIndex/getSnapIndex';
+export { default as getClampedPosition } from './momentum/getClampedPosition/getClampedPosition';
+export { default as getNextIndexByKey } from './momentum/getNextIndexByKey/getNextIndexByKey';
+export {
+  default as stepMomentum,
+  type StepMomentumConfig,
+  type StepMomentumState,
+} from './momentum/stepMomentum/stepMomentum';
+export { default as decideSnap, type DecideSnapConfig } from './momentum/decideSnap/decideSnap';
+export { default as MomentumEngine } from './momentum/momentumEngine';

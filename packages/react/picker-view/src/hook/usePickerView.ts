@@ -1,6 +1,8 @@
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, MouseEvent, TouchEvent } from 'react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { UsePickerViewOptions, UsePickerViewReturn, VelocitySample } from './types';
+import { getClampedPosition, getNextIndexByKey, getSnapIndex } from '@maru-ui/core';
+import { useMomentum } from '@maru-ui/react-hooks';
+import type { UsePickerViewOptions, UsePickerViewReturn } from './types';
 import { MOMENTUM_CONFIG } from './types';
 
 export default function usePickerView({
@@ -23,12 +25,30 @@ export default function usePickerView({
   const [startDragY, setStartDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [velocitySamples, setVelocitySamples] = useState<VelocitySample[]>([]);
 
-  const selectedIndex = Math.max(
-    0,
-    Math.min(Math.round(scrollPosition / itemHeight), pickerViewOptions.length - 1),
-  );
+  const {
+    pushSample,
+    clearSamples,
+    getVelocityFromSamples,
+    start: startMomentum,
+    step: stepMomentumFrame,
+  } = useMomentum({
+    min: 0,
+    max: itemHeight * (pickerViewOptions.length - 1),
+    friction: MOMENTUM_CONFIG.FRICTION,
+    itemHeight,
+    length: pickerViewOptions.length,
+    nearZeroVelocity: MOMENTUM_CONFIG.NEAR_ZERO_VELOCITY,
+    snapVelocityThreshold: MOMENTUM_CONFIG.SNAP_VELOCITY_THRESHOLD,
+    boundaryPx: MOMENTUM_CONFIG.BOUNDARY_PX,
+    maxVelocity: MOMENTUM_CONFIG.MAX_VELOCITY,
+  });
+
+  const selectedIndex = getSnapIndex({
+    position: scrollPosition,
+    itemHeight,
+    length: pickerViewOptions.length,
+  });
   const selectedValue = pickerViewOptions[selectedIndex]?.value ?? 0;
 
   const scrollContainer = () => wrapperRef.current?.children[0] as HTMLElement | undefined;
@@ -38,10 +58,11 @@ export default function usePickerView({
     (finalPosition: number) => {
       if (rafId.current) cancelAnimationFrame(rafId.current);
 
-      const index = Math.max(
-        0,
-        Math.min(Math.round(finalPosition / itemHeight), pickerViewOptions.length - 1),
-      );
+      const index = getSnapIndex({
+        position: finalPosition,
+        itemHeight,
+        length: pickerViewOptions.length,
+      });
       const targetPosition = index * itemHeight;
       currentIndex.current = index;
 
@@ -77,40 +98,25 @@ export default function usePickerView({
       if (rafId.current) cancelAnimationFrame(rafId.current);
 
       setIsAnimating(true);
-      let velocity = initialVelocity * -1;
-      let currentPosition = scrollPosition;
+      startMomentum({
+        position: scrollPosition,
+        velocity: initialVelocity * -1,
+      });
       let lastTime = performance.now();
 
       const animate = (currentTime: number) => {
         const time = currentTime - lastTime;
         lastTime = currentTime;
-        currentPosition += velocity * time;
+        const stepResult = stepMomentumFrame(time);
 
-        if (currentPosition < 0) {
-          currentPosition = 0;
-          velocity = 0;
-        } else if (currentPosition > maxScrollPosition) {
-          currentPosition = maxScrollPosition;
-          velocity = 0;
-        }
-
-        setScrollPosition(currentPosition);
-        velocity *= MOMENTUM_CONFIG.FRICTION;
+        setScrollPosition(stepResult.position);
 
         const container = scrollContainer();
-        if (container) container.scrollTop = currentPosition;
+        if (container) container.scrollTop = stepResult.position;
 
-        const nearestIndex = Math.round(currentPosition / itemHeight);
-        const targetScrollPosition = nearestIndex * itemHeight;
-        const distance = Math.abs(currentPosition - targetScrollPosition);
-        const isNearZeroVelocity = Math.abs(velocity) <= MOMENTUM_CONFIG.NEAR_ZERO_VELOCITY;
-        const isSlowEnough = Math.abs(velocity) <= MOMENTUM_CONFIG.SNAP_VELOCITY_THRESHOLD;
-        const isNearBoundary = distance <= MOMENTUM_CONFIG.BOUNDARY_PX;
-
-        // 속도가 0에 충분히 가깝고 옵션의 끝단에 충분히 가깝거나, 속도가 충분히 느리면 스냅
-        if ((isNearZeroVelocity && isNearBoundary) || isSlowEnough) {
+        if (stepResult.shouldSnap) {
           setIsAnimating(false);
-          snapToClosestItem(currentPosition);
+          snapToClosestItem(stepResult.position);
         } else {
           rafId.current = requestAnimationFrame(animate);
         }
@@ -118,7 +124,7 @@ export default function usePickerView({
 
       rafId.current = requestAnimationFrame(animate);
     },
-    [scrollPosition, maxScrollPosition, itemHeight, snapToClosestItem],
+    [scrollPosition, snapToClosestItem, startMomentum, stepMomentumFrame],
   );
 
   const handleStart = useCallback(
@@ -127,31 +133,30 @@ export default function usePickerView({
       setIsAnimating(false);
       setStartDragY(clientY);
       setStartDragScrollPosition(scrollPosition);
-      setVelocitySamples([{ time: performance.now(), y: clientY }]);
+      clearSamples();
+      pushSample({ time: performance.now(), value: clientY });
     },
-    [scrollPosition],
+    [scrollPosition, clearSamples, pushSample],
   );
 
   const handleMove = useCallback(
     (clientY: number) => {
       if (!isDragging || isAnimating) return;
 
-      const newScrollPosition = Math.max(
-        0,
-        Math.min(maxScrollPosition, startDragScrollPosition + (startDragY - clientY)),
-      );
+      const newScrollPosition = getClampedPosition({
+        position: startDragScrollPosition + (startDragY - clientY),
+        min: 0,
+        max: maxScrollPosition,
+      });
       setScrollPosition(newScrollPosition);
 
       const container = scrollContainer();
       if (container) container.scrollTop = newScrollPosition;
 
       const now = performance.now();
-      setVelocitySamples((prev) => [
-        ...prev.filter((sample) => now - sample.time <= 100),
-        { time: now, y: clientY },
-      ]);
+      pushSample({ time: now, value: clientY });
     },
-    [isDragging, isAnimating, startDragY, startDragScrollPosition, maxScrollPosition],
+    [isDragging, isAnimating, startDragY, startDragScrollPosition, maxScrollPosition, pushSample],
   );
 
   const handleEnd = useCallback(
@@ -159,7 +164,7 @@ export default function usePickerView({
       if (!isDragging) return;
       setIsDragging(false);
 
-      const velocity = calculateVelocity(velocitySamples);
+      const velocity = getVelocityFromSamples();
 
       // 속도가 느리면(클릭 등) 즉시 선택 처리
       if (Math.abs(velocity) < MOMENTUM_CONFIG.MIN_VELOCITY) {
@@ -189,7 +194,14 @@ export default function usePickerView({
 
       applyMomentumScroll(velocity);
     },
-    [isDragging, velocitySamples, pickerViewOptions, itemHeight, onChange, applyMomentumScroll],
+    [
+      isDragging,
+      pickerViewOptions,
+      itemHeight,
+      onChange,
+      applyMomentumScroll,
+      getVelocityFromSamples,
+    ],
   );
 
   const handleMouseDown = useCallback(
@@ -215,22 +227,16 @@ export default function usePickerView({
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       event.stopPropagation();
-      event.preventDefault();
 
-      let newIndex = currentIndex.current;
-      if (event.key === 'ArrowUp') {
-        newIndex = newIndex >= pickerViewOptions.length - 1 ? 0 : newIndex + 1;
-      } else if (event.key === 'ArrowDown') {
-        newIndex = newIndex <= 0 ? pickerViewOptions.length - 1 : newIndex - 1;
-      } else if (event.key === 'PageUp') {
-        newIndex = Math.min(pickerViewOptions.length - 1, newIndex + 5);
-      } else if (event.key === 'PageDown') {
-        newIndex = Math.max(0, newIndex - 5);
-      } else if (event.key === 'Home') {
-        newIndex = 0;
-      } else if (event.key === 'End') {
-        newIndex = pickerViewOptions.length - 1;
-      } else return;
+      const newIndex = getNextIndexByKey({
+        key: event.key,
+        currentIndex: currentIndex.current,
+        length: pickerViewOptions.length,
+      });
+
+      if (newIndex === currentIndex.current) return;
+
+      event.preventDefault();
 
       if (pickerViewOptions[newIndex]) {
         onChange(pickerViewOptions[newIndex].value, pickerViewOptions[newIndex]);
@@ -371,21 +377,4 @@ export default function usePickerView({
     handleMouseMove,
     handleTouchStart,
   };
-}
-
-function calculateVelocity(samples: VelocitySample[]) {
-  if (samples.length < 2) return 0;
-
-  // 100ms 범위 내 수집된 샘플 값으로 속도 계산
-  const first = samples[0];
-  const last = samples[samples.length - 1];
-  const time = last.time - first.time;
-  const distance = last.y - first.y;
-
-  if (time <= 0) return 0;
-
-  return Math.max(
-    -MOMENTUM_CONFIG.MAX_VELOCITY,
-    Math.min(MOMENTUM_CONFIG.MAX_VELOCITY, distance / time),
-  );
 }

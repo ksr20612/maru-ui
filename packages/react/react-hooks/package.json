@@ -1,23 +1,16 @@
 {
-  "name": "@maru-ui/core",
+  "name": "@maru-ui/react-hooks",
   "version": "0.0.1",
-  "description": "Framework-agnostic core utilities and engine for Maru UI",
+  "description": "Reusable React hooks for Maru UI (e.g., useMomentum)",
   "type": "module",
-  "main": "./dist/index.mjs",
+  "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "default": "./dist/index.mjs",
       "require": "./dist/index.js"
-    },
-    "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.mjs",
-      "default": "./dist/*.mjs",
-      "require": "./dist/*.js"
     }
   },
   "files": [
@@ -30,13 +23,17 @@
     "clean": "rm -rf dist",
     "test": "vitest"
   },
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
   "devDependencies": {
     "@maru-ui/config-typescript": "workspace:*",
-    "@maru-ui/config-vitest": "workspace:*",
+    "@maru-ui/core": "workspace:*",
+    "@types/react": "^19.0.1",
     "glob": "^13.0.6",
+    "react": "^19.0.0",
     "typescript": "^5.8.3",
-    "vite": "^8.0.0",
-    "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.1.0"
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.0.0"
   }
 }

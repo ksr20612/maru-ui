@@ -12,11 +12,6 @@ export interface PickerViewItem {
   value: number;
 }
 
-export interface VelocitySample {
-  time: number;
-  y: number;
-}
-
 export const MOMENTUM_CONFIG = {
   FRICTION: 0.95,
   SNAP_FORCE: 0.2,
