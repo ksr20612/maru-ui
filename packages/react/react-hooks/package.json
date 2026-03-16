@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@maru-ui/config-typescript": "workspace:*",
+    "@maru-ui/core": "workspace:*",
     "@types/react": "^19.0.1",
     "glob": "^13.0.6",
     "react": "^19.0.0",

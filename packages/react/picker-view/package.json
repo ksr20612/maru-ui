@@ -38,6 +38,7 @@
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
     "@maru-ui/core": "workspace:*",
+    "@maru-ui/react-hooks": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "typescript": "^5.8.3",

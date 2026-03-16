@@ -187,6 +187,9 @@ importers:
       '@maru-ui/config-typescript':
         specifier: workspace:*
         version: link:../config-typescript
+      '@maru-ui/react-hooks':
+        specifier: workspace:*
+        version: link:react-hooks
       '@storybook/addon-essentials':
         specifier: ^8.6.18
         version: 8.6.18(@types/react@19.2.14)(storybook@8.6.18(prettier@3.8.1))
@@ -229,6 +232,9 @@ importers:
       '@maru-ui/core':
         specifier: workspace:*
         version: link:../../core
+      '@maru-ui/react-hooks':
+        specifier: workspace:*
+        version: link:../react-hooks
       '@storybook/react':
         specifier: ^8.4.7
         version: 8.6.18(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(storybook@8.6.18(prettier@3.8.1))(typescript@5.9.3)
@@ -259,6 +265,9 @@ importers:
       '@maru-ui/config-typescript':
         specifier: workspace:*
         version: link:../../config-typescript
+      '@maru-ui/core':
+        specifier: workspace:*
+        version: link:../../core
       '@types/react':
         specifier: ^19.0.1
         version: 19.2.14
