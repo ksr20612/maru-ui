@@ -1,7 +1,7 @@
 {
   "name": "@maru-ui/react-hooks",
   "version": "0.0.1",
-  "description": "Reusable React hooks for Maru UI (e.g., useMomentum)",
+  "description": "Reusable React hooks for Maru UI",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
