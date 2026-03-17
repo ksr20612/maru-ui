@@ -1,0 +1,55 @@
+name: Snapshot Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'npm dist-tag (예: snapshot, next)'
+        required: true
+        default: 'snapshot'
+      preid:
+        description: '프리릴리즈 식별자 (예: snapshot, canary)'
+        required: true
+        default: 'snapshot'
+
+jobs:
+  snapshot-release:
+    name: Publish Snapshot Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Bump versions in snapshot mode
+        run: pnpm changeset version --snapshot ${{ inputs.preid }}
+
+      - name: Publish snapshot to npm
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm changeset publish --tag ${{ inputs.tag }}
+
+      - name: Show published snapshot versions
+        run: |
+          echo "Snapshot release finished."
+          echo "preid: ${{ inputs.preid }}"
+          echo "tag:   ${{ inputs.tag }}"

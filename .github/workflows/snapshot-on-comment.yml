@@ -1,0 +1,123 @@
+name: Snapshot Release (Comment)
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  snapshot:
+    name: Snapshot for PR
+    if: |
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/snapshot') &&
+      contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      packages: read
+      id-token: write
+
+    steps:
+      - name: Add 👀 reaction
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'eyes'
+            });
+
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
+          fetch-depth: 0
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Bump versions in snapshot mode
+        run: pnpm changeset version --snapshot snapshot
+
+      - name: Publish snapshot to npm
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm changeset publish --tag snapshot
+
+      - name: Comment snapshot result
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // TODO: 배포할 패키지 목록 알아서 가져오기
+            const packageDirs = [
+              'packages/core',
+              'packages/react/react-hooks',
+              'packages/react/picker-view',
+            ];
+            const versions = [];
+
+            for (const dir of packageDirs) {
+              const pkgPath = path.join(dir, 'package.json');
+              if (!fs.existsSync(pkgPath)) continue;
+              const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+              versions.push(`- \`${pkg.name}\`: \`${pkg.version}\``);
+            }
+
+            const body = [
+              '## 📦 Snapshot Release',
+              '',
+              '- tag: `snapshot`',
+              '- preid: `snapshot`',
+              '',
+              versions.length > 0 ? '### Published versions' : '### Published versions',
+              ...(versions.length > 0 ? versions : ['- (no packages detected)']),
+              '',
+              `> Triggered by @${context.payload.comment.user.login} via \`/snapshot\``
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body
+            });
+
+      - name: Add 🎉 reaction
+        if: success()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'hooray'
+            });
+
+      - name: Add 👎 reaction
+        if: failure()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: '-1'
+            });

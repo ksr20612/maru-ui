@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/**'
+      - 'docs/**'
+      - '.github/workflows/release-packages.yml'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run the release process'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Release Maru UI Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: read
+      id-token: write
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Show Changeset Status (Dry Run)
+        if: ${{ inputs.dry_run }}
+        run: pnpm changeset status
+
+      - name: Create Release PR or Publish Packages
+        if: ${{ !inputs.dry_run }}
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm changeset version
+          publish: pnpm changeset publish
+          title: 'release: version packages'
+          createGithubRelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
