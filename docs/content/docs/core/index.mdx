@@ -1,0 +1,43 @@
+---
+title: Core
+---
+
+**Experimental** — `@maru-ui/core`는 아직 초기 단계입니다.  
+공개 API·모듈 구성이 **예고 없이 바뀔 수 있으니**, 프로덕션에서는 버전 핀과 변경 로그를 꼭 확인해 주세요.
+
+`@maru-ui/core`는 **React에 의존하지 않는** Maru UI용 저수준 유틸과 물리 엔진을 제공합니다.
+
+## 설치
+
+### pnpm
+
+```bash
+pnpm add @maru-ui/picker-view
+```
+
+### npm
+
+```bash
+npm i @maru-ui/picker-view
+```
+
+### yarn
+
+```bash
+yarn add @maru-ui/picker-view
+```
+
+## 공개 API (요약)
+
+`packages/core/src/index.ts`에서 내보내는 항목입니다.
+
+| 이름                                                                     | 설명                                                                                                           |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `MomentumEngine`                                                         | 샘플 기반 속도 추정, `step`마다 관성(`stepMomentum`) + 스냅 판정(`decideSnap`)까지 돌리는 엔진 클래스.         |
+| `stepMomentum`                                                           | 1차원 `position`·`velocity`에 마찰과 `min`/`max` 경계 클램프를 한 스텝 적용.                                   |
+| `decideSnap`                                                             | 현재 위치·속도와 `itemHeight`·`length`로 가장 가까운 스냅 줄을 정하고, **스냅으로 멈출지**(`shouldSnap`) 판별. |
+| `calculateVelocity`                                                      | 시간·값 샘플 배열로부터 속도 추정.                                                                             |
+| `getSnapIndex`                                                           | 스크롤 위치와 `itemHeight`·개수로 스냅 인덱스 계산.                                                            |
+| `getClampedPosition`                                                     | 위치를 허용 범위로 제한.                                                                                       |
+| `getNextIndexByKey`                                                      | 키보드 방향 등으로 다음/이전 인덱스 계산.                                                                      |
+| 타입 (`MomentumEngineConfig`, `VelocitySample`, `MomentumStepResult` 등) | 엔진·스텝 결과용 타입.                                                                                         |

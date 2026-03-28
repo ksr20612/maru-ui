@@ -1,0 +1,208 @@
+---
+title: '@maru-ui/picker-view'
+---
+
+**PickerView**는 세로로 스크롤하며 값을 고르는 **휠형 선택** UI입니다.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <PickerViewBasicDemo />
+  </Tab>
+  <Tab value="Code">
+
+```tsx
+import { useState } from 'react';
+import { PickerView, PickerViewOption } from '@maru-ui/picker-view';
+import '@maru-ui/picker-view/styles';
+
+export function Example() {
+  const [value, setValue] = useState(1);
+
+  return (
+    <PickerView value={value} onChange={setValue}>
+      <PickerViewOption value={1}>1</PickerViewOption>
+      <PickerViewOption value={2}>2</PickerViewOption>
+      <PickerViewOption value={3}>3</PickerViewOption>
+      <PickerViewOption value={4}>4</PickerViewOption>
+      <PickerViewOption value={5}>5</PickerViewOption>
+      <PickerViewOption value={6}>6</PickerViewOption>
+      <PickerViewOption value={7}>7</PickerViewOption>
+      <PickerViewOption value={8}>8</PickerViewOption>
+      <PickerViewOption value={9}>9</PickerViewOption>
+      <PickerViewOption value={10}>10</PickerViewOption>
+    </PickerView>
+  );
+}
+```
+
+  </Tab>
+</Tabs>
+
+## 설치
+
+### pnpm
+
+```bash
+pnpm add @maru-ui/picker-view
+```
+
+### npm
+
+```bash
+npm i @maru-ui/picker-view
+```
+
+### yarn
+
+```bash
+yarn add @maru-ui/picker-view
+```
+
+스타일을 쓰려면 엔트리에서 CSS를 한 번 불러옵니다.
+
+```tsx
+import '@maru-ui/picker-view/styles';
+```
+
+## Example
+
+### 옵션 커스터마이징
+
+`renderOption`을 사용하면 각 행의 내용·스타일을 직접 그릴 수 있습니다.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <PickerViewCustomRenderDemo />
+  </Tab>
+  <Tab value="Code">
+
+```tsx
+import { useState } from 'react';
+import type { PickerViewOptionProps } from '@maru-ui/picker-view';
+import { PickerView, PickerViewOption } from '@maru-ui/picker-view';
+import '@maru-ui/picker-view/styles';
+
+export function CustomRenderExample() {
+  const [value, setValue] = useState(8);
+
+  return (
+    <PickerView
+      value={value}
+      onChange={setValue}
+      itemHeight={100}
+      renderOption={(props: PickerViewOptionProps, isSelected: boolean) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            color: isSelected ? 'red' : 'unset',
+          }}
+        >
+          <span>{isSelected ? '🔥' : ''}</span>
+          {props.value.toString().padStart(2, '0')}:00
+        </div>
+      )}
+    >
+      {Array.from({ length: 24 }, (_, i) => (
+        <PickerViewOption key={i} value={i} id={`option-${i}`} />
+      ))}
+    </PickerView>
+  );
+}
+```
+
+  </Tab>
+</Tabs>
+
+### 스크롤 인터랙션 의도적으로(코드로) 호출하기
+
+**`value`** 를 변경하면 해당 값에 맞는 옵션으로 스크롤됩니다.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <PickerViewProgrammaticScrollDemo />
+  </Tab>
+  <Tab value="Code">
+
+```tsx
+import { useState } from 'react';
+import { PickerView, PickerViewOption } from '@maru-ui/picker-view';
+import '@maru-ui/picker-view/styles';
+
+export function ProgrammaticScrollExample() {
+  const [value, setValue] = useState(8);
+
+  return (
+    <>
+      <PickerView value={value} onChange={setValue}>
+        {Array.from({ length: 24 }, (_, i) => (
+          <PickerViewOption key={i} value={i} id={`option-${i}`}>
+            {i}
+          </PickerViewOption>
+        ))}
+      </PickerView>
+      <button type="button" onClick={() => setValue(Math.floor(Math.random() * 24))}>
+        Scroll to Random Value
+      </button>
+    </>
+  );
+}
+```
+
+  </Tab>
+</Tabs>
+
+## Parameter — `PickerViewProps`
+
+| 이름           | 타입                                                               | 필수 | 설명                                                              |
+| -------------- | ------------------------------------------------------------------ | ---- | ----------------------------------------------------------------- |
+| `value`        | `number`                                                           | ✓    | 현재 선택된 옵션의 `value`.                                       |
+| `onChange`     | `(selectedValue: number) => void`                                  | ✓    | 선택이 바뀌었을 때 호출됩니다.                                    |
+| `itemHeight`   | `number`                                                           |      | 한 옵션 줄 높이(px). 기본값 **50**.                               |
+| `renderOption` | `(props: PickerViewOptionProps, isSelected: boolean) => ReactNode` |      | 기본은 자식 `children` 렌더. 넘기면 라벨/레이아웃을 커스텀합니다. |
+| 기타           | `HTMLAttributes<HTMLDivElement>`                                   |      | 래퍼에 전달 (`className`, `style` 등). `onChange` 제외.           |
+| `children`     | `PickerViewOption` 들                                              | ✓    | 각 옵션은 `PickerViewOption` 이어야 합니다.                       |
+
+## PickerViewOption
+
+| 이름       | 타입                             | 필수 | 설명                                                                         |
+| ---------- | -------------------------------- | ---- | ---------------------------------------------------------------------------- |
+| `value`    | `number`                         | ✓    | 이 줄이 나타내는 값. 부모 `value`와 매칭됩니다.                              |
+| `children` | `ReactNode`                      |      | 기본 라벨( `renderOption` 없을 때 표시).                                     |
+| 기타       | `HTMLAttributes<HTMLDivElement>` |      | 옵션 행 `div`에 합쳐지며, 훅이 붙이는 속성(역할, 이벤트 등) 뒤에 병합됩니다. |
+
+---
+
+## usePickerView (`@maru-ui/picker-view/hook`)
+
+Headless 훅으로 화면을 직접 구성할 때 사용할 수 있습니다.
+
+## Parameter — `UsePickerViewOptions`
+
+| 이름         | 타입                                                             | 필수 | 설명                                                                                       |
+| ------------ | ---------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------ |
+| `options`    | `PickerViewOptionProps[]`                                        | ✓    | 옵션 메타 배열(`value` 및 `HTMLAttributes` 등). UI 컴포넌트는 자식에서 이 배열을 만듭니다. |
+| `value`      | `number`                                                         |      | controlled 선택 값.                                                                        |
+| `onChange`   | `(selectedValue: number, option: PickerViewOptionProps) => void` | ✓    | 선택 변경 시 값과 해당 옵션 props를 함께 전달합니다.                                       |
+| `itemHeight` | `number`                                                         | ✓    | 줄 높이(px).                                                                               |
+
+## Response — `UsePickerViewReturn`
+
+| 이름                                       | 타입                                                | 설명                                  |
+| ------------------------------------------ | --------------------------------------------------- | ------------------------------------- |
+| `selectedIndex`                            | `number`                                            | 현재 스냅 기준 선택 인덱스.           |
+| `selectedValue`                            | `number`                                            | 현재 선택 `value`.                    |
+| `scrollPosition`                           | `number`                                            | 스크롤 위치(px).                      |
+| `isDragging`                               | `boolean`                                           | 드래그 중 여부.                       |
+| `isAnimating`                              | `boolean`                                           | 관성·스냅 애니메이션 등 진행 중 여부. |
+| `wrapperRef`                               | `RefObject<HTMLDivElement \| null>`                 | 휠 루트에 연결.                       |
+| `getWrapperProps`                          | `() => HTMLAttributes<HTMLDivElement>`              | 루트에 바인딩할 props.                |
+| `getListProps`                             | `() => HTMLAttributes<HTMLDivElement>`              | 스크롤 리스트 컨테이너.               |
+| `getTopSpacerProps`                        | `() => HTMLAttributes<HTMLDivElement>`              | 상단 패딩 영역.                       |
+| `getBottomSpacerProps`                     | `() => HTMLAttributes<HTMLDivElement>`              | 하단 패딩 영역.                       |
+| `getOptionProps`                           | `(index: number) => HTMLAttributes<HTMLDivElement>` | 각 옵션 행에 바인딩.                  |
+| `handleStart` / `handleMove` / `handleEnd` | …                                                   | 포인터 제스처 보조.                   |
+| `handleMouseDown` / `handleMouseMove`      | …                                                   | 마우스.                               |
+| `handleTouchStart`                         | …                                                   | 터치.                                 |
+| `handleKeyDown`                            | …                                                   | 방향키 등 키보드.                     |

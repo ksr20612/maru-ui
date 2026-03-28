@@ -5,5 +5,6 @@ dist
 .DS_Store
 .env*.local
 .next
+**/next-env.d.ts
 docs/.source
 storybook-static

@@ -1,0 +1,22 @@
+---
+title: '@maru-ui/react-hooks'
+---
+
+`@maru-ui/react-hooks`는 Maru UI 컴포넌트에서 함께 쓰는 **React 전용 훅** 패키지입니다.  
+스크롤 **관성·스냅**, SSR에 안전한 레이아웃 이펙트, 접근성(모션 선호) 같은 공통 훅을 제공합니다.
+
+제스처·스크롤 UX를 직접 만들 때 이 패키지를 직접 사용하실 수 있습니다.
+
+## 설치
+
+```bash
+pnpm add @maru-ui/react-hooks
+```
+
+## hooks
+
+| 훅                                                                          | 설명                                                                     |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [useIsomorphicLayoutEffect](/docs/react-hooks/use-isomorphic-layout-effect) | 적절한 부수 효과 함수를 선택해 SSR 시점에서도 안정성을 높여보세요.       |
+| [usePrefersReducedMotion](/docs/react-hooks/use-prefers-reduced-motion)     | `prefers-reduced-motion` 미디어 쿼리를 구독해 애니메이션을 조절해보세요. |
+| [useMomentum](/docs/react-hooks/use-momentum)                               | 관성 엔진은 훅으로 사용해 보세요.                                        |

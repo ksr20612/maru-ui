@@ -1,35 +1,33 @@
 ---
 title: 시작하기
-description: Maru UI 설치 및 사용 방법
 ---
 
-# 시작하기
+## 제공하는 라이브러리
 
-## 설치
+| 패키지                 | 역할                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| `@maru-ui/core`        | 프레임워크에 묶이지 않는 공통 로직·엔진. 컴포넌트와 훅이 함께 쓰는 기반입니다. |
+| `@maru-ui/react-hooks` | Maru UI 전반에서 재사용하는 React 훅 모음.                                     |
+| `@maru-ui/picker-view` | 휠/스크롤형 선택 UI와, 같은 동작을 **Headless**로 쓰기 위한 훅.                |
+
+## 빠른 시작: PickerView
+
+### 설치
+
+#### pnpm
 
 ```bash
 pnpm add @maru-ui/picker-view
-# 또는 Hook만 사용 시
-pnpm add @maru-ui/picker-view
-# import from '@maru-ui/picker-view/hook'
 ```
 
-## 기본 사용
+#### npm
 
-```tsx
-import { PickerView } from '@maru-ui/picker-view';
-import '@maru-ui/picker-view/styles';
-
-<PickerView items={['일', '이', '삼']} />;
+```bash
+npm i @maru-ui/picker-view
 ```
 
-## Headless (Hook만)
+#### yarn
 
-```tsx
-import { usePickerView } from '@maru-ui/picker-view/hook';
-
-const { selectedIndex, setSelectedIndex } = usePickerView({
-  itemCount: 10,
-  visibleCount: 5,
-});
+```bash
+yarn add @maru-ui/picker-view
 ```

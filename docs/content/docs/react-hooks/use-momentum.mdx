@@ -1,0 +1,56 @@
+---
+title: useMomentum
+---
+
+관성을 기반으로 위치와 속도를 재계산합니다.
+현재는 PickerView 컴포넌트에 특화되어 있습니다.
+`useMomentum`은 [`@maru-ui/core`](/docs/core)의 `MomentumEngine`을 React 훅으로 감싼 것입니다.
+
+## Parameters
+
+`UseMomentumConfig` 단일 인자
+
+| 필드                    | 타입     | 설명                                                                          |
+| ----------------------- | -------- | ----------------------------------------------------------------------------- |
+| `min`                   | `number` | 스크롤 가능한 최소 위치(px), 이 값보다 작으면 스크롤이 불가합니다.            |
+| `max`                   | `number` | 스크롤 가능한 최대 위치(px), 이 값보다 크면 스크롤이 불가합니다.              |
+| `friction`              | `number` | 감속(마찰) 계수                                                               |
+| `itemHeight`            | `number` | 한 옵션 높이(px)                                                              |
+| `length`                | `number` | 옵션 개수                                                                     |
+| `maxVelocity`           | `number` | `getVelocityFromSamples`로 추정 속도를 캡할 때 사용                           |
+| `nearZeroVelocity`      | `number` | 선택 속도가 이 값보다 작으면 최종 [스냅] 상태로 판단합니다.                   |
+| `snapVelocityThreshold` | `number` | 감속된 속도가 이 값보다 작으면 최종 [스냅] 상태로 판단합니다.                 |
+| `boundaryPx`            | `number` | 계산된 위치와 옵션과의 거리가 이 값보다 작으면 최종 [스냅] 상태로 판단합니다. |
+| `sampleWindowMs`        | `number` | (선택, 기본 100) `pushSample` 샘플 유지 시간 윈도우(ms)                       |
+
+## Response
+
+`UseMomentumReturn` - 엔진 API를 그대로 노출합니다.
+
+| 이름                     | 타입                                   | 설명                                                                                                                                                                   |
+| ------------------------ | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pushSample`             | `(sample: VelocitySample) => void`     | 드래그 중 위치 샘플. `VelocitySample`은 `{ time: number; value: number }`.                                                                                             |
+| `clearSamples`           | `() => void`                           | 샘플 초기화                                                                                                                                                            |
+| `getVelocityFromSamples` | `() => number`                         | 최근 샘플로부터 추정한 속도 (`maxVelocity` 한도 적용)                                                                                                                  |
+| `start`                  | `(state: MomentumEngineState) => void` | `position`·`velocity`로 관성 루프 시작                                                                                                                                 |
+| `step`                   | `(dt: number) => MomentumStepResult`   | `dt`만큼 관성 시뮬레이션 한 스텝 + `decideSnap` 결과 병합. `shouldSnap`·`snapIndex`·`snapPosition`·`distance` 등은 **판정 정보**이며, 실제 스크롤 정렬은 호출자가 사용 |
+| `stop`                   | `() => void`                           | 엔진 중지                                                                                                                                                              |
+| `isRunning`              | `() => boolean`                        | 아직 `step`으로 관성을 돌릴지 여부 (`shouldSnap`으로 꺼질 수 있음)                                                                                                     |
+
+## 사용법
+
+```tsx
+import { useMomentum } from '@maru-ui/react-hooks';
+
+const momentum = useMomentum({
+  min: 0,
+  max: itemHeight * (itemCount - 1),
+  friction: 0.95,
+  itemHeight,
+  length: itemCount,
+  nearZeroVelocity: 0.2,
+  snapVelocityThreshold: 0.04,
+  boundaryPx: 4,
+  maxVelocity: 1.62,
+});
+```
