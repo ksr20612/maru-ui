@@ -1,0 +1,10 @@
+{
+  "title": "@maru-ui/react-hooks",
+  "root": true,
+  "pages": [
+    "overview",
+    "use-isomorphic-layout-effect",
+    "use-prefers-reduced-motion",
+    "use-momentum"
+  ]
+}

@@ -10,6 +10,7 @@
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
+    "@maru-ui/picker-view": "workspace:*",
     "fumadocs-core": "^16.6.10",
     "zod": "^4.3.6",
     "fumadocs-mdx": "^14.2.9",

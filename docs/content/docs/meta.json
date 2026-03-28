@@ -1,4 +1,4 @@
 {
-  "title": "문서",
-  "pages": ["intro", "getting-started", "components/picker-view"]
+  "title": "Maru UI",
+  "pages": ["index", "getting-started", "react", "react-hooks", "core"]
 }

@@ -1,7 +1,7 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
 export const gitConfig = {
-  user: 'your-username',
+  user: 'ksr20612',
   repo: 'maru-ui',
   branch: 'main',
 };

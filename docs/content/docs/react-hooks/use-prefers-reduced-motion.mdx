@@ -1,0 +1,32 @@
+---
+title: usePrefersReducedMotion
+---
+
+OS·브라우저에서 **애니메이션 줄이기**가 켜져 있으면 `true`를 반환합니다.  
+`window.matchMedia('(prefers-reduced-motion: reduce)')`를 구독하고, 변경 시 상태가 갱신됩니다.
+
+**애니메이션 줄이기**를 실시간으로 모니터링하고, 좀더 **포용적인** UI를 만들어 보세요.
+
+## Parameters
+
+이 훅은 인자를 받지 않습니다.
+
+## Response
+
+| 이름   | 타입      | 설명                                                                                                                                  |
+| ------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 반환값 | `boolean` | `(prefers-reduced-motion: reduce)`가 적용되면 `true`, 그렇지 않으면 `false`. `window` / `matchMedia`를 쓸 수 없는 환경에서는 `false`. |
+
+## Example
+
+```tsx
+import { usePrefersReducedMotion } from '@maru-ui/react-hooks';
+
+export function MotionSafeBox({ children }: { children: React.ReactNode }) {
+  const isMotionReduced = usePrefersReducedMotion();
+
+  return (
+    <div style={{ transition: isMotionReduced ? 'none' : 'transform 200ms ease' }}>{children}</div>
+  );
+}
+```

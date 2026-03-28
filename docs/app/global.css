@@ -1,3 +1,9 @@
 @import 'tailwindcss';
+
+/* MDX 등 app 바깥 파일에 쓴 class도 스캔되도록 */
+@source '../content/**/*.mdx';
+@source '../content/**/*.tsx';
+@source '../components/**/*.tsx';
+
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';

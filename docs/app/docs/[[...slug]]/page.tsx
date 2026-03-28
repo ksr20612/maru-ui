@@ -8,9 +8,15 @@ type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
 
+function normalizeSlug(slug: string[] | undefined): string[] {
+  /** `/docs` — optional catch-all with no segments → root `index.mdx` (slug `[]`). */
+  if (slug != null && slug.length > 0) return slug;
+  return [];
+}
+
 export default async function Page({ params }: PageProps) {
   const { slug } = await params;
-  const page = source.getPage(slug);
+  const page = source.getPage(normalizeSlug(slug));
   if (!page) notFound();
 
   const MDX = page.data.body;
@@ -27,12 +33,16 @@ export default async function Page({ params }: PageProps) {
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  const generated = await source.generateParams();
+  const hasDocsRoot = generated.some(
+    (p) => p.slug === undefined || (Array.isArray(p.slug) && p.slug.length === 0),
+  );
+  return hasDocsRoot ? generated : [{ slug: undefined }, ...generated];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const page = source.getPage(slug);
+  const page = source.getPage(normalizeSlug(slug));
   if (!page) return {};
 
   return {
